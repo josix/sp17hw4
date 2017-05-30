@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>hw4</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/static/css/bootstrap.css" type="text/css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="/static/css/bootstrap-responsive.css" type="text/css" rel="stylesheet">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- codemirror -->
+    <script type="application/javascript" src="/static/js/codemirror.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/codemirror.css">
+
+    <script>
+    var Module = {
+      print: function(text) {
+        console.log('stdout: ' + text);
+		var outputElement = document.getElementById('output');
+        outputElement.innerHTML = outputElement.innerHTML + (outputElement.innerHTML ? '<br>' : '') + text;
+      },
+      printErr: function(text) {
+        var outputElement = document.getElementById('stderr');
+        outputElement.innerHTML = outputElement.innerHTML + (outputElement.innerHTML ? '<br>' : '') + text;
+      },
+	  //arguments: 'hw2_data.in -o hw2_out.out'.split(' '),
+
+      //arguments: '-cc1 -emit-llvm -disable-free -disable-llvm-verifier -main-file-name hello_world.c -mrelocation-model static -mdisable-fp-elim -fmath-errno -masm-verbose -mconstructor-aliases -target-linker-version 2.22 -momit-leaf-frame-pointer -coverage-file /home/alon/Dev/clangor/hello_world.s -resource-dir /home/alon/Dev/clang+llvm-3.2-x86-linux-ubuntu-12.04/bin/../lib/clang/3.2 -internal-isystem /usr/local/include -internal-isystem /home/alon/Dev/clang+llvm-3.2-x86-linux-ubuntu-12.04/bin/../lib/clang/3.2/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -fdebug-compilation-dir /home/alon/Dev/clangor -ferror-limit 19 -fmessage-length 205 -mstackrealign -fobjc-runtime=gcc -fdiagnostics-show-option -fcolor-diagnostics -o input.s -x c ./hw2_data1.in'.split(' '),
+
+        //[
+        //  '-ccc-echo',
+        //  '-ccc-print-phases',
+        //  '-c', '-x', 'cpp-output', 'input.cpp'
+        //],
+
+      noInitialRun: true,
+    };
+    </script>
+    <script async src="/static/js/hw2.js"></script>
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <!--a class="brand" href="lua.vm.js.html">lua.vm.js</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li><a href="lua.vm.js.html">Benchmarks+FAQ</a></li>
+              <li class="active"><a href="repl.html">REPL</a></li>
+              <li><a href="script_example.html">Script Example</a></li>
+            </ul>
+          </div--><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="hero-unit">
+        <h2>SIC/XE Assembler Pass1 in JS</h2>
+        <p>by 103207425王韋勝</p>
+      </div>
+
+      <div class="row">
+        <div class="span4" border=1>
+          <h4>input</h4>
+          <textarea id="mytext">
+COPY START 1000
+FIRST STL RETADR
+CLOOP JSUB RDREC
+LDA LENGTH
+COMP ZERO
+JEQ ENDFIL
+JSUB WRREC
+J CLOOP
+ENDFIL LDA EOF
+STA BUFFER
+LDA THREE
+STA LENGTH
+JSUB WRREC
+LDL RETADR
+RSUB
+EOF BYTE C'EOF'
+THREE WORD 3
+ZERO WORD 0
+RETADR RESW 1
+LENGTH RESW 1
+BUFFER RESB 4096
+.
+. SUBROUTINE TO READ RECORD INTO BUFFER
+.
+RDREC LDX ZERO
+LDA ZERO
+RLOOP TD INPUT
+JEQ RLOOP
+RD INPUT
+COMP ZERO
+JEQ EXIT
+STCH BUFFER,X
+TIX MAXLEN
+JLT RLOOP
+EXIT STX LENGTH
+RSUB
+INPUT BYTE X'F1'
+MAXLEN WORD 4096
+.
+. SUBROUTINE TO WRITE RECORD FROM BUFFER
+.
+WRREC LDX ZERO
+WLOOP TD OUTPUT
+JEQ WLOOP
+LDCH BUFFER,X
+WD OUTPUT
+TIX LENGTH
+JLT WLOOP
+RSUB
+OUTPUT BYTE X'05'
+END FIRST
+</textarea>
+          <h4>console</h4>
+          <pre id="stderr"></pre>
+        </div>
+        <div class="span8">
+          <h4>output</h4>
+          <pre id="output"></pre>
+        </div>
+      </div>
+
+      <p><a href="#" class="btn btn-primary btn-large " onclick="executeCode(myCodeMirror.getValue(), true); return false" id="the_button">Execute &raquo;</a></p>
+
+    </div> <!-- /container -->
+
+<script>
+// CodeMirror
+var myCodeMirror = CodeMirror.fromTextArea(document.getElementById('mytext'));
+//myCodeMirror.setSize(screen.width*0.6, screen.height*0.2);
+
+// Execution
+
+function executeCode(code, clear) {
+  var theButton = document.getElementById('the_button');
+  theButton.style = 'visibility: hidden';
+  //try {
+    //FS.unlink('./hw2_data1.in');
+  //} catch(e) {}
+  //FS.createDataFile('/', 'hw2_data.in', intArrayFromString(code), true, true); // TODO use 'code'
+  Module.callMain(Module.arguments);
+  //var outputElement = document.getElementById('output');
+  //outputElement.innerHTML = intArrayToString(FS.root.contents['hw2_out.out'].contents);
+}
+</script>
+
+  </body>
+</html>
+
+
